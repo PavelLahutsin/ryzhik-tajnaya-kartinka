@@ -1,0 +1,23 @@
+[
+  {
+    "id": "ryzhik-stoit",
+    "title": "Рыжик",
+    "file": "ryzhik-stoit.webp",
+    "enemies": 1,
+    "winPercent": 0.75
+  },
+  {
+    "id": "ryzhik-mashet",
+    "title": "Привет!",
+    "file": "ryzhik-mashet.webp",
+    "enemies": 2,
+    "winPercent": 0.75
+  },
+  {
+    "id": "ryzhik-zaryadka",
+    "title": "Зарядка",
+    "file": "ryzhik-zaryadka.webp",
+    "enemies": 3,
+    "winPercent": 0.75
+  }
+]
