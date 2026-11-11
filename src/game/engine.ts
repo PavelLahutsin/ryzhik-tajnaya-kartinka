@@ -14,12 +14,17 @@ import {
   type Point,
 } from "./capture";
 
+/** Hearts given at the start of a level, unless the level sets its own number. */
+export const DEFAULT_LIVES = 3;
+
 export type GameConfig = {
   enemies: number;
   winPercent: number;
+  /** Optional per-level life count. Falls back to DEFAULT_LIVES. */
+  lives?: number;
 };
 
-export type GameEvent = "capture" | "rewind" | "win";
+export type GameEvent = "capture" | "rewind" | "win" | "fail";
 
 export type Enemy = {
   x: number;
@@ -34,8 +39,10 @@ export class Game {
   readonly rows = ROWS;
   readonly grid: Cell[][];
   readonly winPercent: number;
+  readonly maxLives: number;
   readonly enemies: Enemy[] = [];
 
+  lives: number;
   playerX = 0;
   playerY = 0;
   /** Smoothed position for drawing, in cell units. */
@@ -48,6 +55,8 @@ export class Game {
   dragTarget: Point | null = null;
   drawing = false;
   won = false;
+  /** True after the last heart is gone, until restart(). */
+  failed = false;
   percent = 0;
   /** Brief visual flash after a soft rewind. */
   rewindPulse = 0;
@@ -55,11 +64,14 @@ export class Game {
   private playerAcc = 0;
   private readonly playerStep = 0.17;
   private readonly enemyStep: number;
+  private readonly enemyCount: number;
   private readonly listeners = new Map<GameEvent, Set<() => void>>();
 
   constructor(config: GameConfig) {
     this.grid = createGrid(this.cols, this.rows);
     this.winPercent = config.winPercent;
+    this.maxLives = Math.max(1, config.lives ?? DEFAULT_LIVES);
+    this.lives = this.maxLives;
     this.playerX = Math.floor(this.cols / 2);
     this.playerY = this.rows - 1;
     this.visualX = this.playerX;
@@ -67,8 +79,9 @@ export class Game {
     this.lastSafeX = this.playerX;
     this.lastSafeY = this.playerY;
     this.percent = capturedPercent(this.grid);
-    this.enemyStep = config.enemies <= 1 ? 0.38 : config.enemies === 2 ? 0.34 : 0.3;
-    this.spawnEnemies(Math.max(1, Math.min(3, config.enemies)));
+    this.enemyCount = Math.max(1, Math.min(3, config.enemies));
+    this.enemyStep = this.enemyCount <= 1 ? 0.38 : this.enemyCount === 2 ? 0.34 : 0.3;
+    this.spawnEnemies();
   }
 
   on(event: GameEvent, handler: () => void): () => void {
@@ -82,7 +95,7 @@ export class Game {
   }
 
   setDirection(dx: number, dy: number): void {
-    if (this.won) return;
+    if (this.won || this.failed) return;
     // Four directions only; ignore diagonals and zeroes from a bad swipe.
     if (dx !== 0 && dy !== 0) {
       if (Math.abs(dx) >= Math.abs(dy)) dy = 0;
@@ -93,7 +106,7 @@ export class Game {
   }
 
   setDragTarget(x: number, y: number): void {
-    if (this.won) return;
+    if (this.won || this.failed) return;
     const tx = Math.max(0, Math.min(this.cols - 1, Math.floor(x)));
     const ty = Math.max(0, Math.min(this.rows - 1, Math.floor(y)));
     this.dragTarget = { x: tx, y: ty };
@@ -109,8 +122,35 @@ export class Game {
     }
   }
 
+  /** Full level retry: clear the field, restore hearts, respawn bees. */
+  restart(): void {
+    const fresh = createGrid(this.cols, this.rows);
+    for (let y = 0; y < this.rows; y++) {
+      const row = this.grid[y]!;
+      const src = fresh[y]!;
+      for (let x = 0; x < this.cols; x++) row[x] = src[x]!;
+    }
+    this.playerX = Math.floor(this.cols / 2);
+    this.playerY = this.rows - 1;
+    this.visualX = this.playerX;
+    this.visualY = this.playerY;
+    this.lastSafeX = this.playerX;
+    this.lastSafeY = this.playerY;
+    this.dirX = 0;
+    this.dirY = 0;
+    this.dragTarget = null;
+    this.drawing = false;
+    this.won = false;
+    this.failed = false;
+    this.lives = this.maxLives;
+    this.percent = capturedPercent(this.grid);
+    this.rewindPulse = 0;
+    this.playerAcc = 0;
+    this.spawnEnemies();
+  }
+
   update(dt: number): void {
-    if (this.won) {
+    if (this.won || this.failed) {
       this.visualX += (this.playerX - this.visualX) * Math.min(1, dt * 12);
       this.visualY += (this.playerY - this.visualY) * Math.min(1, dt * 12);
       return;
@@ -122,18 +162,18 @@ export class Game {
       this.playerAcc -= this.playerStep;
       if (this.dragTarget) this.aimAt(this.dragTarget.x, this.dragTarget.y);
       this.stepPlayer();
-      if (this.won) break;
+      if (this.won || this.failed) break;
     }
 
-    if (!this.won) {
+    if (!this.won && !this.failed) {
       for (const enemy of this.enemies) {
         enemy.acc += step;
         while (enemy.acc >= this.enemyStep) {
           enemy.acc -= this.enemyStep;
           this.stepEnemy(enemy);
-          if (this.won) break;
+          if (this.won || this.failed) break;
         }
-        if (this.won) break;
+        if (this.won || this.failed) break;
       }
     }
 
@@ -165,7 +205,8 @@ export class Game {
     }
   }
 
-  private spawnEnemies(count: number): void {
+  private spawnEnemies(): void {
+    this.enemies.length = 0;
     const spots: Point[] = [
       { x: Math.floor(this.cols / 2), y: Math.floor(this.rows / 2) },
       { x: Math.floor(this.cols * 0.3), y: Math.floor(this.rows * 0.4) },
@@ -176,7 +217,7 @@ export class Game {
       { x: -1, y: 1 },
       { x: 1, y: -1 },
     ];
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < this.enemyCount; i++) {
       const spot = spots[i]!;
       const dir = dirs[i]!;
       this.enemies.push({
@@ -282,7 +323,7 @@ export class Game {
   }
 
   private rewind(): void {
-    if (this.won) return;
+    if (this.won || this.failed) return;
     clearTrail(this.grid);
     this.playerX = this.lastSafeX;
     this.playerY = this.lastSafeY;
@@ -292,7 +333,13 @@ export class Game {
     this.dirY = 0;
     this.drawing = false;
     this.rewindPulse = 1;
+    this.lives = Math.max(0, this.lives - 1);
     this.emit("rewind");
+    if (this.lives <= 0) {
+      this.failed = true;
+      this.dragTarget = null;
+      this.emit("fail");
+    }
   }
 
   private finish(): void {

@@ -15,6 +15,8 @@ export type LevelDef = {
   file: string;
   enemies: number;
   winPercent: number;
+  /** Optional. When omitted, the engine uses DEFAULT_LIVES (3). */
+  lives?: number;
 };
 
 export type Level = LevelDef & { image: string };

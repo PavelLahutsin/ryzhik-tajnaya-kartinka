@@ -291,8 +291,58 @@ button {
 }
 
 .screen--game {
+  position: relative;
   padding-bottom: 12px;
   gap: 10px;
+}
+
+.game__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.hud-lives {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+}
+
+.heart {
+  width: 44px;
+  height: 44px;
+  fill: #ff5b6b;
+  stroke: #c23145;
+  stroke-width: 1.4;
+  overflow: visible;
+  filter: drop-shadow(0 3px 0 rgba(194, 49, 69, 0.25));
+}
+
+.heart.is-empty {
+  fill: #f3e6d6;
+  stroke: #d7c3ab;
+  filter: none;
+}
+
+.heart.is-lost {
+  animation: heart-lost 0.45s ease;
+}
+
+@keyframes heart-lost {
+  0% {
+    transform: scale(1.2);
+  }
+  45% {
+    transform: scale(0.72);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .game__stage {
@@ -322,6 +372,34 @@ button {
   font-weight: 700;
   color: var(--ink-soft);
   min-height: 1.3em;
+}
+
+.retry {
+  display: none;
+  position: absolute;
+  inset: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px;
+  background: rgba(255, 252, 247, 0.92);
+  border-radius: var(--radius-lg);
+  z-index: 2;
+}
+
+.retry.is-open {
+  display: flex;
+}
+
+.retry__msg {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 7vw, 44px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
 }
 
 .screen--win .win__art-wrap {
