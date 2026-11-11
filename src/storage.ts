@@ -1,23 +1,30 @@
 import { platform } from "./platform";
+import { normalizeProgress, recordWin, type Progress } from "./progress";
+
+export type { Progress } from "./progress";
 
 const KEY = "progress";
-
-export type Progress = {
-  completed: string[];
-};
-
-function normalize(value: Progress | null): Progress {
-  if (!value || !Array.isArray(value.completed)) return { completed: [] };
-  return { completed: value.completed.filter((id) => typeof id === "string") };
-}
+const LAST_KEY = "last-win";
 
 export async function loadProgress(): Promise<Progress> {
-  return normalize(await platform.storage.get<Progress>(KEY));
+  return normalizeProgress(await platform.storage.get<unknown>(KEY));
 }
 
-export async function markCompleted(id: string): Promise<Progress> {
-  const progress = await loadProgress();
-  if (!progress.completed.includes(id)) progress.completed.push(id);
+/** Save a win; returns the new progress. */
+export async function markCompleted(id: string, stars = 1): Promise<Progress> {
+  const progress = recordWin(await loadProgress(), id, stars);
   await platform.storage.set(KEY, progress);
+  await platform.storage.set(LAST_KEY, { id, stars });
   return progress;
+}
+
+/** Stars from the most recent win, so the win screen can celebrate them. */
+export async function lastWin(): Promise<{ id: string; stars: number } | null> {
+  const value = await platform.storage.get<{ id?: unknown; stars?: unknown }>(LAST_KEY);
+  if (!value || typeof value.id !== "string" || typeof value.stars !== "number") return null;
+  return { id: value.id, stars: value.stars };
+}
+
+export async function clearLastWin(): Promise<void> {
+  await platform.storage.remove(LAST_KEY);
 }

@@ -1,63 +1,103 @@
-import { isUnlocked, levels } from "../data/levels";
+import { isUnlocked, worlds, type Level } from "../data/levels";
+import { totalStars } from "../game/stars";
 import { navigate } from "../router";
-import { loadProgress } from "../storage";
+import { loadProgress, type Progress } from "../storage";
 import { el } from "../ui/dom";
+import { starRow } from "../ui/icons";
 
 export function renderLevels(root: HTMLElement): () => void {
-  const grid = el("div", { class: "level-grid" });
+  const list = el("div", { class: "worlds" });
   const view = el("div", { class: "screen screen--list" }, [
     toolbar("Картинки", () => navigate("/")),
-    grid,
+    list,
   ]);
   root.append(view);
 
   let cancelled = false;
   void loadProgress().then((progress) => {
     if (cancelled) return;
-    for (const level of levels) {
-      const open = isUnlocked(level.id, progress.completed);
-      const done = progress.completed.includes(level.id);
-      const card = el(
-        "button",
+    let focus: HTMLElement | null = null;
+    for (const world of worlds) {
+      const ids = world.levels.map((level) => level.id);
+      const grid = el("div", { class: "level-grid" });
+      const firstOpen = isUnlocked(world.levels[0]!.id, progress.completed);
+      const section = el(
+        "section",
         {
-          class: `level-card${open ? "" : " is-locked"}${done ? " is-done" : ""}`,
-          attrs: {
-            type: "button",
-            disabled: open ? null : true,
-            "aria-label": open
-              ? done
-                ? `${level.title}, картинка уже открыта`
-                : `Играть: ${level.title}`
-              : `${level.title}, ещё закрыта`,
-          },
-          on: {
-            click: () => {
-              if (open) navigate(`/game/${level.id}`);
-            },
-          },
+          class: `world${firstOpen ? "" : " is-locked"}`,
+          style: { "--world": world.color },
+          attrs: { "aria-label": world.title },
         },
         [
-          el("img", {
-            class: "level-card__art",
-            attrs: {
-              src: level.image,
-              alt: "",
-              draggable: "false",
-            },
-          }),
-          el("span", { class: "level-card__name", text: level.title }),
-          done ? el("span", { class: "level-card__badge", text: "Открыта" }) : null,
-          open ? null : el("span", { class: "level-card__lock", text: "Закрыта", attrs: { "aria-hidden": "true" } }),
+          el("header", { class: "world__head" }, [
+            el("h2", { class: "world__title", text: world.title }),
+            el("span", {
+              class: "world__stars",
+              text: `★ ${totalStars(progress.stars, ids)} из ${ids.length * 3}`,
+            }),
+          ]),
+          grid,
         ],
       );
-      grid.append(card);
+      for (const level of world.levels) {
+        const card = levelCard(level, progress);
+        if (!focus && card.classList.contains("is-next")) focus = card;
+        grid.append(card);
+      }
+      list.append(section);
     }
+    // Bring the next level to play into view.
+    focus?.scrollIntoView({ block: "center" });
   });
 
   return () => {
     cancelled = true;
     view.remove();
   };
+}
+
+function levelCard(level: Level, progress: Progress): HTMLElement {
+  const open = isUnlocked(level.id, progress.completed);
+  const done = progress.completed.includes(level.id);
+  const stars = progress.stars[level.id] ?? 0;
+  const state = done ? " is-done" : open ? " is-next" : " is-locked";
+  return el(
+    "button",
+    {
+      class: `level-card${state}`,
+      attrs: {
+        type: "button",
+        disabled: open ? null : true,
+        "aria-label": open
+          ? done
+            ? `${level.title}, звёзд: ${stars} из 3`
+            : `Играть: ${level.title}`
+          : `Картинка ${level.number}, ещё закрыта`,
+      },
+      on: {
+        click: () => {
+          if (open) navigate(`/game/${level.id}`);
+        },
+      },
+    },
+    [
+      el("span", { class: "level-card__frame" }, [
+        // A picture stays secret until it is opened: blurred when next, hidden when locked.
+        open
+          ? el("img", {
+              class: "level-card__art",
+              attrs: { src: level.image, alt: "", draggable: "false", loading: "lazy" },
+            })
+          : el("span", { class: "level-card__art level-card__mystery", text: "?" }),
+        el("span", { class: "level-card__num", text: String(level.number) }),
+        done ? null : open ? el("span", { class: "level-card__play", attrs: { "aria-hidden": "true" } }) : null,
+      ]),
+      el("span", { class: "level-card__foot" }, [
+        el("span", { class: "level-card__name", text: done ? level.title : open ? "Тайная картинка" : "Закрыта" }),
+        done ? starRow(stars) : null,
+      ]),
+    ],
+  );
 }
 
 export function toolbar(title: string, onBack: () => void, extra?: HTMLElement): HTMLElement {

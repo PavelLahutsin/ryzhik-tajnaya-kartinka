@@ -1,23 +1,46 @@
-[
-  {
-    "id": "ryzhik-stoit",
-    "title": "Рыжик",
-    "file": "ryzhik-stoit.webp",
-    "enemies": 1,
-    "winPercent": 0.75
-  },
-  {
-    "id": "ryzhik-mashet",
-    "title": "Привет!",
-    "file": "ryzhik-mashet.webp",
-    "enemies": 2,
-    "winPercent": 0.75
-  },
-  {
-    "id": "ryzhik-zaryadka",
-    "title": "Зарядка",
-    "file": "ryzhik-zaryadka.webp",
-    "enemies": 3,
-    "winPercent": 0.75
-  }
-]
+{
+  "worlds": [
+    {
+      "id": "ryzhik",
+      "title": "Рыжик",
+      "color": "#ffb23f",
+      "cols": 16,
+      "rows": 9,
+      "levels": [
+        {"id": "ryzhik-stoit", "title": "Рыжик", "file": "ryzhik-stoit.webp", "enemies": 1, "beeStep": 0.44, "winPercent": 0.65, "intro": "howto"},
+        {"id": "ryzhik-mashet", "title": "Привет!", "file": "ryzhik-mashet.webp", "enemies": 1, "beeStep": 0.42, "winPercent": 0.68, "items": ["heart"], "intro": "heart"},
+        {"id": "ryzhik-zaryadka", "title": "Зарядка", "file": "ryzhik-zaryadka.webp", "enemies": 2, "beeStep": 0.42, "winPercent": 0.7, "items": ["heart", "snail"], "intro": "snail"},
+        {"id": "ryzhik-myachik", "title": "Мячик", "file": "ryzhik-myachik.webp", "enemies": 2, "beeStep": 0.4, "winPercent": 0.72, "items": ["heart", "snail", "star"], "intro": "star"},
+        {"id": "ryzhik-zmey", "title": "Воздушный змей", "file": "ryzhik-zmey.webp", "enemies": 2, "beeStep": 0.38, "winPercent": 0.72, "items": ["heart", "snail", "star"]}
+      ]
+    },
+    {
+      "id": "semya",
+      "title": "Семья",
+      "color": "#ff7aa2",
+      "cols": 18,
+      "rows": 10,
+      "levels": [
+        {"id": "mama", "title": "Мама", "file": "mama.webp", "enemies": 2, "beeStep": 0.38, "winPercent": 0.72, "puddles": 2, "items": ["heart", "snail"], "intro": "puddle"},
+        {"id": "papa", "title": "Папа", "file": "papa.webp", "enemies": 2, "beeStep": 0.36, "winPercent": 0.72, "puddles": 2, "items": ["heart", "snail", "honey"], "intro": "honey"},
+        {"id": "bratik", "title": "Братик", "file": "bratik.webp", "enemies": 3, "beeStep": 0.36, "winPercent": 0.74, "puddles": 3, "items": ["heart", "honey", "star"]},
+        {"id": "sad", "title": "В саду", "file": "sad.webp", "enemies": 3, "fastBees": 1, "beeStep": 0.36, "winPercent": 0.75, "items": ["heart", "snail", "honey", "star"], "intro": "fast"},
+        {"id": "piknik", "title": "Пикник", "file": "piknik.webp", "enemies": 3, "fastBees": 1, "beeStep": 0.34, "winPercent": 0.75, "puddles": 3, "items": ["heart", "snail", "honey", "star"]}
+      ]
+    },
+    {
+      "id": "druzya",
+      "title": "Друзья",
+      "color": "#4cc38a",
+      "cols": 20,
+      "rows": 11,
+      "levels": [
+        {"id": "belka", "title": "Белка", "file": "belka.webp", "enemies": 2, "beeStep": 0.36, "winPercent": 0.75, "ladybugs": 1, "items": ["heart", "snail"], "intro": "ladybug"},
+        {"id": "zayka", "title": "Зайка", "file": "zayka.webp", "enemies": 2, "fastBees": 1, "beeStep": 0.36, "winPercent": 0.75, "ladybugs": 1, "items": ["heart", "shield", "star"], "intro": "shield"},
+        {"id": "mishka", "title": "Мишка", "file": "mishka.webp", "enemies": 3, "beeStep": 0.34, "winPercent": 0.76, "ladybugs": 1, "items": ["heart", "honey", "shield", "star"]},
+        {"id": "ezhik", "title": "Ёжик", "file": "ezhik.webp", "enemies": 3, "fastBees": 1, "beeStep": 0.34, "winPercent": 0.77, "ladybugs": 1, "puddles": 2, "items": ["heart", "snail", "honey", "shield", "star"]},
+        {"id": "vse-vmeste", "title": "Все вместе", "file": "vse-vmeste.webp", "enemies": 3, "fastBees": 1, "beeStep": 0.32, "winPercent": 0.78, "ladybugs": 2, "puddles": 2, "items": ["heart", "snail", "honey", "shield", "star"]}
+      ]
+    }
+  ]
+}

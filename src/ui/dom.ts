@@ -23,7 +23,12 @@ export function el<K extends keyof HTMLElementTagNameMap>(
       node.setAttribute(key, value === true ? "" : String(value));
     }
   }
-  if (props.style) Object.assign(node.style, props.style);
+  if (props.style) {
+    for (const [key, value] of Object.entries(props.style)) {
+      if (key.startsWith("--")) node.style.setProperty(key, value);
+      else (node.style as unknown as Record<string, string>)[key] = value;
+    }
+  }
   if (props.on) {
     for (const [event, listener] of Object.entries(props.on)) {
       node.addEventListener(event, listener);
