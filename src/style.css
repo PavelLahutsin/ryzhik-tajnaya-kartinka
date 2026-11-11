@@ -447,3 +447,437 @@ button {
     width: min(46vh, 360px);
   }
 }
+
+/* ---------- v2: worlds, stars, helpers ---------- */
+
+.screen--start .hero {
+  animation: hero-bob 3.2s ease-in-out infinite;
+}
+
+@keyframes hero-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+.start__score {
+  margin: 12px auto 0;
+  padding: 8px 16px;
+  width: fit-content;
+  border-radius: 999px;
+  background: var(--yellow-tint);
+  color: var(--orange-deep);
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.worlds {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.world {
+  --world: #ffb23f;
+  padding: 14px;
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--world) 16%, var(--surface));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--world) 45%, transparent);
+}
+
+.world.is-locked {
+  filter: saturate(0.55);
+}
+
+.world__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 2px 6px 12px;
+}
+
+.world__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 6vw, 32px);
+  font-weight: 700;
+}
+
+.world__stars {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--orange-deep);
+  white-space: nowrap;
+}
+
+.world .level-grid {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.level-card__frame {
+  position: relative;
+  display: block;
+}
+
+.level-card.is-next .level-card__art {
+  filter: blur(9px) saturate(1.2);
+  transform: scale(1.12);
+}
+
+.level-card.is-next .level-card__frame {
+  overflow: hidden;
+}
+
+.level-card.is-next {
+  box-shadow: var(--shadow-card), 0 0 0 4px var(--orange);
+  animation: next-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes next-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.025);
+  }
+}
+
+.level-card__mystery {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 54px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  background: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--world, #ffb23f) 55%, #fff),
+    color-mix(in srgb, var(--world, #ffb23f) 55%, #fff) 14px,
+    color-mix(in srgb, var(--world, #ffb23f) 42%, #fff) 14px,
+    color-mix(in srgb, var(--world, #ffb23f) 42%, #fff) 28px
+  );
+}
+
+.level-card.is-locked {
+  filter: none;
+}
+
+.level-card__num {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 800;
+  font-size: 18px;
+  box-shadow: 0 2px 0 rgba(59, 46, 37, 0.15);
+}
+
+.level-card__play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 6px 14px -6px rgba(163, 73, 13, 0.7);
+}
+
+.level-card__play::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  top: 16px;
+  border-style: solid;
+  border-width: 12px 0 12px 19px;
+  border-color: transparent transparent transparent #fff;
+}
+
+.level-card__foot {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px 0;
+}
+
+.level-card__foot .level-card__name {
+  padding: 0;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.star {
+  width: 24px;
+  height: 24px;
+  fill: #eadcc8;
+}
+
+.star.is-on {
+  fill: #ffc12e;
+  stroke: #e08a00;
+  stroke-width: 1.5;
+}
+
+.stars--big .star {
+  width: 64px;
+  height: 64px;
+}
+
+.stars--big .star.is-on {
+  animation: star-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+}
+
+.stars--big .star:nth-child(2) {
+  animation-delay: 0.25s;
+}
+
+.stars--big .star:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+@keyframes star-pop {
+  from {
+    transform: scale(0) rotate(-40deg);
+  }
+  to {
+    transform: scale(1) rotate(0);
+  }
+}
+
+/* Game HUD */
+.hud {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 48px;
+}
+
+.hud .hud-lives {
+  min-height: 44px;
+  gap: 6px;
+}
+
+.hud .heart {
+  width: 38px;
+  height: 38px;
+}
+
+.goal {
+  position: relative;
+  flex: 1;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 3px var(--line);
+  overflow: visible;
+}
+
+.goal__fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange));
+  transition: width 0.4s ease;
+}
+
+.goal__star {
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 34px;
+  line-height: 1;
+  color: #ffc12e;
+  text-shadow: 0 2px 0 #e08a00;
+}
+
+.screen--game .game__stage {
+  background: color-mix(in srgb, var(--world, #ffb23f) 22%, #fffaf2);
+}
+
+.hud-effects {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  min-height: 0;
+}
+
+.effect {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--line);
+}
+
+.effect__bar {
+  display: block;
+  width: 100%;
+  max-width: 54px;
+  min-width: 4px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--emerald);
+  transition: width 0.2s linear;
+}
+
+.effect {
+  width: 110px;
+}
+
+.intro {
+  background: rgba(255, 252, 247, 0.96);
+  gap: 10px;
+}
+
+.intro__hero {
+  width: 120px;
+  height: auto;
+}
+
+.intro__icon {
+  width: 112px;
+  height: 112px;
+  animation: hero-bob 2.4s ease-in-out infinite;
+}
+
+.intro__eyebrow {
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--orange-deep);
+  font-size: 16px;
+}
+
+.intro__text {
+  margin: 0 0 8px;
+  max-width: 20rem;
+  text-align: center;
+  font-size: 22px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+/* Win */
+.screen--win .win__art-wrap {
+  position: relative;
+}
+
+.win__art {
+  animation: win-in 0.6s ease-out;
+}
+
+@keyframes win-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.win__score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.win__stars {
+  min-height: 64px;
+}
+
+.win__praise {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti i {
+  position: absolute;
+  top: -20px;
+  width: 12px;
+  height: 18px;
+  border-radius: 3px;
+  opacity: 0;
+  animation: confetti-fall 2.6s ease-in 1 forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(70vh) rotate(540deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen--start .hero,
+  .level-card.is-next,
+  .intro__icon,
+  .confetti i,
+  .stars--big .star.is-on {
+    animation: none;
+  }
+  .confetti {
+    display: none;
+  }
+}
+
+/* The stage hugs the field; the body centres everything vertically. */
+.screen--game .game__body {
+  justify-content: center;
+}
+
+.screen--game .game__stage {
+  flex: 0 0 auto;
+  padding: 0;
+}
+
+.screen--game .hud,
+.screen--game .hud-effects,
+.screen--game .game__note {
+  flex: 0 0 auto;
+}
